@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Chat</title>
+</head>
+<body>
+    <h1>Live Chat</h1>
+    <div id="chat"></div>
+    <input type="text" id="username" placeholder="Enter your username">
+    <input type="text" id="message" placeholder="Enter your message">
+    <button onclick="sendMessage()">Send</button>
+
+    <script>
+        const socket = new WebSocket("ws://localhost:8080/ws");
+
+        socket.onopen = () => {
+            console.log("Connected to chat server");
+        };
+
+        socket.onmessage = (event) => {
+            const chat = document.getElementById("chat");
+            const message = JSON.parse(event.data);
+            const newMessage = document.createElement("p");
+            newMessage.textContent = `${message.username}: ${message.content}`;
+            chat.appendChild(newMessage);
+        };
+
+        function sendMessage() {
+            const username = document.getElementById("username").value;
+            const message = document.getElementById("message").value;
+            if (username && message) {
+                socket.send(JSON.stringify({ username, content: message }));
+                document.getElementById("message").value = "";
+            }
+        }
+    </script>
+</body>
+</html>
