@@ -46,8 +46,8 @@ func (chatRepository *ChatRepository) RemoveClientFromRoom(roomID string, conn *
 	chatRepository.Mutex.Lock()
 	defer chatRepository.Mutex.Unlock()
 
-	// fmt.Println("Memory num repo start:", &chatRepository.ChatRoom)
-	// fmt.Println("Length repo: start", len(chatRepository.ChatRoom))
+	fmt.Println("Memory num repo start:", &chatRepository.ChatRoom)
+	fmt.Println("Length repo: start", len(chatRepository.ChatRoom))
 
 	if room, exists := chatRepository.ChatRoom[roomID]; exists {
 		room.Mutex.Lock()
@@ -56,8 +56,14 @@ func (chatRepository *ChatRepository) RemoveClientFromRoom(roomID string, conn *
 		// If implement delete room
 		if len(room.Clients) == 0 {
 
-			// // Implement Backup room history to redis or database
+			// // Implement Backup chat room history to DB (go routine)
 			// repo.BackupRoomHistoryToDB(roomID, room.History)
+
+			// Implement Backup chat room history to DB
+			// if room.IsGroup {
+			// 	repo.BackupRoomHistoryToDB(roomID, room.History)
+
+			// }
 
 			delete(chatRepository.ChatRoom, roomID)
 			fmt.Printf("Room %s deleted\n because no more clients\n", roomID)
@@ -65,6 +71,6 @@ func (chatRepository *ChatRepository) RemoveClientFromRoom(roomID string, conn *
 		room.Mutex.Unlock()
 	}
 
-	// fmt.Println("Memory num repo num repo end:", &chatRepository.ChatRoom)
-	// fmt.Println("Length repo: end", len(chatRepository.ChatRoom))
+	fmt.Println("Memory num repo num repo end:", &chatRepository.ChatRoom)
+	fmt.Println("Length repo: end", len(chatRepository.ChatRoom))
 }

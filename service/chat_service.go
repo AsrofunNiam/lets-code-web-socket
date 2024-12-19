@@ -40,7 +40,7 @@ func (chatService *ChatService) BroadcastMessage(roomID string, msg domain.Messa
 	fmt.Println("obj broadcast room:", room)
 	fmt.Println("obj broadcast room", room.History)
 
-	for client := range room.Clients {
+	for client, userName := range room.Clients {
 
 		// // ignore sender
 		// if client == sender {
@@ -49,9 +49,22 @@ func (chatService *ChatService) BroadcastMessage(roomID string, msg domain.Messa
 
 		err := client.WriteJSON(msg)
 		if err != nil {
-			fmt.Println("Error sending message:", err)
+			fmt.Printf("Error sending message to %s: %v\n", userName, err)
 			client.Close()
 			delete(room.Clients, client)
+		}
+	}
+}
+
+func (service *ChatService) SendHistory(roomID string, conn *websocket.Conn) {
+	room := service.ChatRepository.GetOrCreateRoom(roomID)
+
+	room.Mutex.Lock()
+	defer room.Mutex.Unlock()
+
+	for _, msg := range room.History {
+		if err := conn.WriteJSON(msg); err != nil {
+			fmt.Println("Error sending history:", err)
 		}
 	}
 }
