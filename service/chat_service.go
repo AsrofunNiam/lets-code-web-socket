@@ -30,17 +30,23 @@ func (chatService *ChatService) CreateRoomID(user1, user2 string) string {
 // Broadcast message to room
 func (chatService *ChatService) BroadcastMessage(roomID string, msg domain.Message, sender *websocket.Conn) {
 	room := chatService.ChatRepository.GetOrCreateRoom(roomID)
+
+	// Message history
 	room.Mutex.Lock()
+	room.History = append(room.History, msg)
 	defer room.Mutex.Unlock()
 
 	fmt.Println("message broadcast time:", msg.Timestamp)
+	fmt.Println("obj broadcast room:", room)
+	fmt.Println("obj broadcast room", room.History)
 
 	for client := range room.Clients {
-		// ignore sender
-		if client == sender {
-			continue
-		}
-		// If problem with sending message notfound time message
+
+		// // ignore sender
+		// if client == sender {
+		// 	continue
+		// }
+
 		err := client.WriteJSON(msg)
 		if err != nil {
 			fmt.Println("Error sending message:", err)

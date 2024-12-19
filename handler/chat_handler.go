@@ -29,8 +29,8 @@ var upgraded = websocket.Upgrader{
 func (chatHandler *ChatHandler) HandleConnections(w http.ResponseWriter, r *http.Request) {
 	path := strings.TrimPrefix(r.URL.Path, "/chat/")
 
-	// implementation room your take user name from start chat to target chat
-	// is sample /chat/{user1}_and_{user2} or /chat/{user2}_and_{user1}
+	// Implementation room your take user name from start chat to target chat
+	// Its sample /chat/{user1}_and_{user2} or /chat/{user2}_and_{user1}
 	users := strings.Split(path, "_and_")
 
 	// // Validate user accept max room or min room
@@ -51,15 +51,13 @@ func (chatHandler *ChatHandler) HandleConnections(w http.ResponseWriter, r *http
 	room := chatHandler.ChatService.ChatRepository.GetOrCreateRoom(roomID)
 	room.Mutex.Lock()
 	room.Clients[conn] = users[0]
-	fmt.Println("Client connected to room ascending:", roomID)
-	fmt.Println("Clients started room:", users[0])
 	room.Mutex.Unlock()
 
 	// Handle incoming messages and loop to read and broadcast messages
 	for {
 		var msg domain.Message
 		err := conn.ReadJSON(&msg)
-		fmt.Println(" message read time:", msg.Timestamp)
+		fmt.Println(" object message:", msg)
 		if err != nil {
 			fmt.Println("Error reading message:", err)
 			chatHandler.ChatService.ChatRepository.RemoveClientFromRoom(roomID, conn)
